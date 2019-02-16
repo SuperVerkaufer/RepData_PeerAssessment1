@@ -1,0 +1,67 @@
+
+##Code for reading in the dataset and/or processing the data
+setwd("C:/Users/spencer.ng/Desktop/TH training/R Code Training MMM/Reproducible Research/FITBIT")
+FITBIT <- read.csv("activity.csv", header=TRUE)
+head(FITBIT)
+str(DAILYSTEPS)
+##Histogram of the total number of steps taken each day
+DAILYSTEPS <- aggregate(steps~date, FITBIT, sum)
+head(DAILYSTEPS)
+hist(DAILYSTEPS$steps)
+##Mean and median number of steps taken each day
+averageDAILYSTEPS<- mean(DAILYSTEPS$steps)
+averageDAILYSTEPS
+medianDAILYSTEPS<- median(DAILYSTEPS$steps)
+medianDAILYSTEPS
+##Time series plot of the average number of steps taken
+STEPSperINTERVAL <- aggregate(steps~interval, FITBIT, mean)
+head(STEPSperINTERVAL)
+with(STEPSperINTERVAL, plot(interval, steps
+                        , type="l", main="mean#steps within 5-min interval"
+                        , col = "red")) 
+##The 5-minute interval that, on average, contains the maximum number of steps
+MAXSTEPS <- max(STEPSperINTERVAL$steps)
+MAXSTEPSperINTERVAL <- subset(STEPSperINTERVAL, steps == MAXSTEPS)
+MAXSTEPSperINTERVAL$interval
+##Code to describe and show a strategy for imputing missing data
+colSums(is.na(FITBIT))
+FITBIT$stepsnew <- STEPSperINTERVAL$steps
+head(FITBIT)
+FITBIT$steps[is.na(FITBIT$steps)] <- FITBIT$stepsnew
+head(FITBIT)
+##Histogram of the total number of steps taken each day after missing values are imputed
+DAILYSTEPS1 <- aggregate(steps~date, FITBIT, sum)
+head(DAILYSTEPS1)
+hist(DAILYSTEPS1$steps)
+
+##report the mean and median total number of steps taken per day
+averageDAILYSTEPS1<- mean(DAILYSTEPS1$steps)
+averageDAILYSTEPS1
+medianDAILYSTEPS1<- median(DAILYSTEPS1$steps)
+medianDAILYSTEPS1
+##Difference in mean & median after imputation of steps into NA
+averageDAILYSTEPS1- averageDAILYSTEPS
+medianDAILYSTEPS1- medianDAILYSTEPS
+##differences in activity patterns between weekdays and weekends?
+install.packages("timeDate")
+library(timeDate)
+
+FITBIT$WD <- isWeekday(FITBIT$date)
+head(FITBIT)
+
+weekdayFITBIT <- subset(FITBIT, FITBIT$WD == "TRUE")
+weekdayFITBITMean <- aggregate(steps ~ interval, weekdayFITBIT, mean)
+head(weekdayFITBITMean)
+
+weekendFITBIT <- subset(FITBIT, FITBIT$WD == "FALSE")
+weekendFITBITMean <- aggregate(steps ~ interval, weekendFITBIT, mean)
+head(weekendFITBITMean)
+
+##Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
+plot(weekdayFITBITMean$interval, weekdayFITBITMean$steps
+     , xlab = "interval", ylab = "#steps"
+     , main ="Weekday", col ="red", type="l") 
+
+plot(weekendFITBITMean$interval, weekendFITBITMean$steps
+     , xlab = "interval", ylab = "#steps"
+     , main ="Weekend", col ="red", type="l")
